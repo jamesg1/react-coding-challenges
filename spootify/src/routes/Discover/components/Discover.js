@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import DiscoverBlock from './DiscoverBlock/components/DiscoverBlock';
 import '../styles/_discover.scss';
+import config from '../../../config';
 
 export default class Discover extends Component {
   constructor() {
@@ -11,6 +12,22 @@ export default class Discover extends Component {
       playlists: [],
       categories: []
     };
+  }
+
+  componentDidMount() {
+    this.fetchNewReleases();
+  }
+
+  async fetchNewReleases() {
+    const response = await fetch(`${config.api.baseUrl}/browse/new-releases`, {
+      method: 'GET',
+      headers: new Headers({
+        'Authorization': config.api.tempToken, // Using Temp
+        'Content-Type': 'application/json'
+      })
+    });
+    const newReleases = await response.json();
+    this.setState({ newReleases: [...newReleases.albums.items] });
   }
 
   render() {
