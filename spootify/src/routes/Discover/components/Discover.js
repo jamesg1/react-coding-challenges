@@ -23,9 +23,9 @@ export default class Discover extends Component {
   async componentDidMount() {
     await this.auth();
     await Promise.all([
-      this.fetchNewReleases(),
-      this.fetchFeaturedPlaylists(),
-      this.fetchCategories(),
+      await this.fetchData("new-releases", "albums", "newReleases"),
+      await this.fetchData("featured-playlists", "playlists", "playlists"),
+      await this.fetchData("categories", "categories", "categories"),
     ]);
   }
 
@@ -50,48 +50,8 @@ export default class Discover extends Component {
     });
   }
 
-  async fetchNewReleases() {
-    const response = await fetch(`${config.api.baseUrl}/browse/new-releases`, {
-      method: "GET",
-      headers: new Headers({
-        Authorization: `${this.state.auth.token_type} ${this.state.auth.access_token}`, // Using Temp
-        "Content-Type": "application/json",
-      }),
-    });
-
-    const data = await response.json();
-    this.setState({
-      newReleases: data.albums.items,
-      loading: {
-        ...this.state.loading,
-        newReleases: false,
-      },
-    });
-  }
-
-  async fetchFeaturedPlaylists() {
-    const response = await fetch(
-      `${config.api.baseUrl}/browse/featured-playlists`,
-      {
-        method: "GET",
-        headers: new Headers({
-          Authorization: `${this.state.auth.token_type} ${this.state.auth.access_token}`, // Using Temp
-          "Content-Type": "application/json",
-        }),
-      }
-    );
-    const data = await response.json();
-    this.setState({
-      playlists: data.playlists.items,
-      loading: {
-        ...this.state.loading,
-        playlists: false,
-      },
-    });
-  }
-
-  async fetchCategories() {
-    const response = await fetch(`${config.api.baseUrl}/browse/categories`, {
+  async fetchData(path, resourceType, stateKey) {
+    const response = await fetch(`${config.api.baseUrl}/browse/${path}`, {
       method: "GET",
       headers: new Headers({
         Authorization: `${this.state.auth.token_type} ${this.state.auth.access_token}`, // Using Temp
@@ -100,10 +60,10 @@ export default class Discover extends Component {
     });
     const data = await response.json();
     this.setState({
-      categories: data.categories.items,
+      [stateKey]: data[resourceType].items,
       loading: {
         ...this.state.loading,
-        categories: false,
+        [stateKey]: false,
       },
     });
   }
